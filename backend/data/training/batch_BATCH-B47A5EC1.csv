@@ -1,0 +1,9 @@
+record_id,user_id,transaction_amount,transaction_count,average_transaction_amount,account_balance,transaction_category,fraud_label
+R009,user002,3490.15,2,3490.15,23397.8,POS,0
+R010,user002,2878.8,6,2878.8,17442.17,ATM,0
+R011,user002,36607.72,10,18303.86,8477.96,WIRE_TRANSFER,1
+R012,user002,777.14,7,388.57,24874.28,POS,0
+R013,user002,1027.29,6,1027.29,15748.58,INVESTMENT,1
+R014,user002,14382.79,26,4794.26,3976.77,WIRE_TRANSFER,1
+R015,user002,1810.56,15,603.52,18506.22,ATM,0
+R016,user002,3365.2,9,1682.6,21964.17,POS,0
