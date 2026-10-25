@@ -18,6 +18,7 @@ export default function TrainingPipeline() {
     data_scope: 'TRANSACTION_DATA',
     purpose: 'AI_TRAINING',
     model_type: 'logistic_regression',
+    privacy_enabled: false,
   });
 
   const loadData = async () => {
@@ -258,6 +259,39 @@ export default function TrainingPipeline() {
               />
             </div>
 
+            {/* Privacy Protection Toggle */}
+            <div style={{
+              marginBottom: '1.25rem',
+              backgroundColor: '#1e293b',
+              padding: '0.85rem',
+              borderRadius: '8px',
+              border: formData.privacy_enabled ? '1px solid #38bdf8' : '1px solid #334155',
+              transition: 'border-color 0.2s',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
+                <div>
+                  <label htmlFor="privacy_toggle" style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f1f5f9', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>Privacy Protection (HMAC Pseudonymization)</span>
+                    {formData.privacy_enabled && (
+                      <span style={{ fontSize: '0.65rem', backgroundColor: '#0284c7', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>
+                        Active
+                      </span>
+                    )}
+                  </label>
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.35 }}>
+                    Masks raw user and record IDs with deterministic HMAC-SHA256 tokens before CSV export and model fitting. Authentic consent lineage remains stored in the database.
+                  </p>
+                </div>
+                <input
+                  id="privacy_toggle"
+                  type="checkbox"
+                  checked={formData.privacy_enabled}
+                  onChange={(e) => setFormData({ ...formData, privacy_enabled: e.target.checked })}
+                  style={{ width: '1.15rem', height: '1.15rem', cursor: 'pointer', accentColor: '#38bdf8', marginTop: '2px' }}
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={training}
@@ -307,6 +341,15 @@ export default function TrainingPipeline() {
                     <td style={{ padding: '8px' }}>
                       <div>{b.purpose}</div>
                       <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{b.data_scope}</div>
+                      {b.privacy_enabled ? (
+                        <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontWeight: 600, border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                          Pseudonymized ({b.privacy_mechanism || 'HMAC'})
+                        </span>
+                      ) : (
+                        <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', backgroundColor: 'rgba(148, 163, 184, 0.1)', color: '#94a3b8' }}>
+                          Standard (Raw IDs)
+                        </span>
+                      )}
                     </td>
                     <td style={{ padding: '8px' }}>
                       <span style={{
@@ -359,15 +402,39 @@ export default function TrainingPipeline() {
                 Batch Lineage: {selectedBatch.batch_id}
               </h2>
               <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                Total: {lineage.total_records} records &bull; Allowed: <span style={{ color: '#34d399', fontWeight: 600 }}>{lineage.allowed_records}</span> &bull; Blocked: <span style={{ color: '#f87171', fontWeight: 600 }}>{lineage.blocked_records}</span>
+                Total: {lineage.total_records} records &bull; Allowed: <span style={{ color: '#34d399', fontWeight: 600 }}>{lineage.allowed_records}</span> &bull; Blocked: <span style={{ color: '#f87171', fontWeight: 600 }}>{lineage.blocked_records}</span> &bull; Privacy:{' '}
+                <span style={{ color: selectedBatch.privacy_enabled ? '#38bdf8' : '#94a3b8', fontWeight: 600 }}>
+                  {selectedBatch.privacy_enabled ? 'Active (HMAC Pseudonymized)' : 'Standard (Raw IDs)'}
+                </span>
               </div>
             </div>
-            <button
-              onClick={() => { setSelectedBatch(null); setLineage(null); }}
-              style={{ backgroundColor: '#334155', color: '#f8fafc', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}
-            >
-              Close
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <a
+                href={api.getBatchDatasetUrl(selectedBatch.batch_id)}
+                download={`batch_${selectedBatch.batch_id}_dataset.csv`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  backgroundColor: '#0284c7',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Download CSV
+              </a>
+              <button
+                onClick={() => { setSelectedBatch(null); setLineage(null); }}
+                style={{ backgroundColor: '#334155', color: '#f8fafc', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Close
+              </button>
+            </div>
           </div>
 
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>

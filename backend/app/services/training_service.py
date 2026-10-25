@@ -147,6 +147,8 @@ def create_and_run_training_batch(
         total_records=len(records),
         allowed_records=0,
         blocked_records=0,
+        privacy_enabled=request.privacy_enabled,
+        privacy_mechanism="PSEUDONYMIZATION_HMAC" if request.privacy_enabled else None,
         created_at=datetime.now(timezone.utc),
     )
     db.add(batch)
@@ -281,7 +283,25 @@ def create_and_run_training_batch(
         }
         for r in allowed_records
     ]
-    df_allowed = pd.DataFrame(allowed_dicts)
+
+    # Apply Privacy Protection if opt-in enabled
+    if request.privacy_enabled:
+        from app.services import privacy_service
+        export_dicts = privacy_service.transform_training_records(allowed_dicts)
+        create_audit_log(
+            db=db,
+            event_type="PRIVACY_PROTECTION_APPLIED",
+            consent_id=None,
+            user_id=None,
+            purpose=request.purpose,
+            data_scope=request.data_scope,
+            result="SUCCESS",
+            details=f"HMAC-SHA256 pseudonymization applied to {len(export_dicts)} records in batch {batch.batch_id}",
+        )
+    else:
+        export_dicts = allowed_dicts
+
+    df_allowed = pd.DataFrame(export_dicts)
     df_allowed.to_csv(csv_path, index=False)
     batch.dataset_path = str(csv_path)
 

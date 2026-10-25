@@ -24,6 +24,11 @@ class TrainingBatchCreateRequest(BaseModel):
         min_length=1,
         json_schema_extra={"example": "logistic_regression"},
     )
+    privacy_enabled: bool = Field(
+        default=False,
+        description="Whether to apply privacy protection (HMAC pseudonymization of user and record IDs) to the training export and model training data.",
+        json_schema_extra={"example": False},
+    )
 
 
 class TrainingBatchResponse(BaseModel):
@@ -44,6 +49,8 @@ class TrainingBatchResponse(BaseModel):
     precision: Optional[float] = None
     recall: Optional[float] = None
     f1_score: Optional[float] = None
+    privacy_enabled: bool = False
+    privacy_mechanism: Optional[str] = None
     created_at: datetime
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
