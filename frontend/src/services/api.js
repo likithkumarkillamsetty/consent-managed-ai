@@ -132,5 +132,8 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/training/batches/${batchId}/lineage`);
     return handleResponse(res);
   },
-};
 
+  getBatchDatasetUrl(batchId) {
+    return `${API_BASE_URL}/training/batches/${batchId}/dataset`;
+  },
+};

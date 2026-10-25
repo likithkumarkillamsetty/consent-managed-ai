@@ -214,6 +214,7 @@ def rerun_batch(
         data_scope=batch.data_scope,
         purpose=batch.purpose,
         model_type=batch.model_type,
+        privacy_enabled=batch.privacy_enabled or False,
     )
     new_batch = training_service.create_and_run_training_batch(db=db, request=req)
     return new_batch
